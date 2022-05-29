@@ -34,12 +34,16 @@ Builder buildBundleAdapters(BuilderOptions options) {
 }
 
 Builder buildBundleAdaptersV2(BuilderOptions options) {
-  return BundleAdaptersGeneratorV2(
-    buildExtensions: {
-      r"$lib$": [r"adapters_v2.g.dart"],
-    },
+  return CombinerGenerator(
+    allowSyntaxErrors: true,
     decorator: DartDecorator(
       imports: [mekAdaptableLibrary],
     ),
+    buildExtensions: {
+      r"lib/{{}}.dart": [r"lib/{{}}.adapters_v2.g.dart"],
+    },
+    generators: [
+      BundleAdaptersGeneratorV2(),
+    ],
   );
 }

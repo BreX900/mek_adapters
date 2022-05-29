@@ -1,6 +1,7 @@
 import 'package:meta/meta_meta.dart';
 
-@TargetKind.classType
+abstract class Adaptable {}
+
 class AdaptableClass {
   const AdaptableClass();
 }
@@ -8,4 +9,17 @@ class AdaptableClass {
 @TargetKind.enumType
 class AdaptableEnum {
   const AdaptableEnum();
+}
+
+@TargetKind.topLevelVariable
+class BundleAdapters {
+  final Set<Type> factories;
+
+  const BundleAdapters({
+    this.factories = const {},
+  });
+}
+
+enum Ciao implements Adaptable {
+  piero;
 }

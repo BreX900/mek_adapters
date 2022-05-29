@@ -1,7 +1,6 @@
 import 'package:mek_adaptable/mek_adaptable.dart';
 
-@AdaptableClass()
-class Product {
+class Product implements Adaptable {
   final int id;
   final String? name;
   final List<ProductTag> tags;
@@ -13,13 +12,10 @@ class Product {
   });
 }
 
-@AdaptableEnum()
-enum ProductTag { relevant, magi }
+enum ProductTag implements Adaptable { relevant, magi }
 
 abstract class Pet {}
 
-@AdaptableClass()
-class Dog extends Pet {}
+class Dog extends Pet implements Adaptable {}
 
-@AdaptableClass()
-class Cat extends Pet {}
+class Cat extends Pet implements Adaptable {}

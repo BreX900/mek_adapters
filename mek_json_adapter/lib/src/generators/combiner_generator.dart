@@ -10,7 +10,7 @@ import 'package:source_gen/source_gen.dart';
 class CombinerGenerator implements Builder {
   final bool allowSyntaxErrors;
   final DartDecorator decorator;
-  final List<AnnotationGenerator> generators;
+  final List<Generator> generators;
   @override
   final Map<String, List<String>> buildExtensions;
 
@@ -54,7 +54,7 @@ class CombinerGenerator implements Builder {
 
   Stream<Library> _generate(
     LibraryElement library,
-    List<AnnotationGenerator> generators,
+    List<Generator> generators,
     BuildStep buildStep,
   ) async* {
     final libraryReader = LibraryReader(library);
@@ -71,11 +71,18 @@ class CombinerGenerator implements Builder {
   }
 }
 
-abstract class AnnotationGenerator<T> {
+abstract class Generator {
+  const Generator();
+
+  Stream<Library> generate(LibraryReader library, BuildStep buildStep);
+}
+
+abstract class AnnotationGenerator<T> extends Generator {
   const AnnotationGenerator();
 
   TypeChecker get typeChecker => TypeChecker.fromRuntime(T);
 
+  @override
   Stream<Library> generate(LibraryReader library, BuildStep buildStep) async* {
     for (var annotatedElement in library.annotatedWith(typeChecker)) {
       final generatedValue = await generateForAnnotatedElement(
@@ -91,6 +98,29 @@ abstract class AnnotationGenerator<T> {
   FutureOr<Library?> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
+    BuildStep buildStep,
+  );
+}
+
+abstract class SuperTypeGenerator<T> extends Generator {
+  const SuperTypeGenerator();
+
+  TypeChecker get typeChecker => TypeChecker.fromRuntime(T);
+
+  @override
+  Stream<Library> generate(LibraryReader library, BuildStep buildStep) async* {
+    for (var extendedElement in library.enums.where(typeChecker.isSuperOf)) {
+      final generatedValue = await generateForExtendedElement(
+        extendedElement,
+        buildStep,
+      );
+
+      if (generatedValue != null) yield generatedValue;
+    }
+  }
+
+  FutureOr<Library?> generateForExtendedElement(
+    ClassElement element,
     BuildStep buildStep,
   );
 }

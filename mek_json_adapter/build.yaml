@@ -16,7 +16,7 @@ builders:
   mek_bundle_adapters_v2:
     import: package:mek_json_adapter/builder.dart
     builder_factories: [ 'buildBundleAdaptersV2' ]
-    build_extensions: { "{{}}.dart": [ "{{}}adapters_v2.g.dart" ] }
+    build_extensions: { "lib/{{}}.dart": [ "lib/{{}}.adapters_v2.g.dart" ] }
     auto_apply: root_package # dependents all_packages
     build_to: source
     required_inputs: [ '.adapters.g.dart' ]

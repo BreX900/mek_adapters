@@ -6,6 +6,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:glob/glob.dart';
 import 'package:mek_adaptable/mek_adaptable.dart';
 import 'package:mek_json_adapter/src/builders/build_adapets_var.dart';
+import 'package:mek_json_adapter/src/generators/combiner_generator.dart';
 import 'package:mek_json_adapter/src/utils/dart_decorator.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -54,56 +55,48 @@ class BundleAdaptersGenerator implements Builder {
   }
 }
 
-class BundleAdaptersGeneratorV2 implements Builder {
-  @override
-  final Map<String, List<String>> buildExtensions;
-  final DartDecorator decorator;
-
-  const BundleAdaptersGeneratorV2({
-    required this.buildExtensions,
-    required this.decorator,
-  });
+class BundleAdaptersGeneratorV2 extends AnnotationGenerator<BundleAdapters> {
+  const BundleAdaptersGeneratorV2();
 
   static final _allAdaptersFiles = Glob('**.adapters.g.dart');
 
-  TypeChecker get typeChecker => TypeChecker.fromRuntime(BundleAdapters);
-
   @override
-  FutureOr<void> build(BuildStep buildStep) async {
-    final libraryElement = await buildStep.resolver.libraryFor(buildStep.inputId);
+  FutureOr<Library?> generateForAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) async {
+    print('Find annotation');
 
-    final libraryReader = LibraryReader(libraryElement);
+    final values = annotation.read('factories').setValue;
 
-    for (var annotatedElement in libraryReader.annotatedWith(typeChecker)) {
-      final buildAdaptersVar = BuildMapperVars();
+    print(values.map((e) => e.toTypeValue()));
 
-      final files = await buildStep.findAssets(_allAdaptersFiles).toList();
+    final buildAdaptersVar = BuildMapperVars();
 
-      final elements = await Future.wait(files.map<Future<Iterable<ClassElement>>>((input) async {
-        if (!await buildStep.resolver.isLibrary(input)) return const [];
+    final files = await buildStep.findAssets(_allAdaptersFiles).toList();
 
-        final library = await buildStep.resolver.libraryFor(input);
-        final reader = LibraryReader(library);
+    final elements = await Future.wait(files.map<Future<Iterable<ClassElement>>>((input) async {
+      if (!await buildStep.resolver.isLibrary(input)) return const [];
 
-        return reader.classes.where(TypeChecker.fromRuntime(Adapter).isSuperOf);
-      }));
+      final library = await buildStep.resolver.libraryFor(input);
+      final reader = LibraryReader(library);
 
-      final classes = elements.expand((element) => element);
+      return reader.classes.where(TypeChecker.fromRuntime(Adapter).isSuperOf);
+    }));
 
-      final imports = classes.map((e) => e.library.identifier);
+    final classes = elements.expand((element) => element);
 
-      final content =
-          buildAdaptersVar('adapters', classes.map((e) => Reference(e.name)).toSet(), {});
+    final imports = classes.map((e) => e.library.identifier);
 
-      final code = decorator.decorate(
-        imports: imports,
-        code: content,
-      );
+    final content = buildAdaptersVar(
+      '\$${element.displayName}',
+      classes.map((e) => Reference(e.name)).toSet(),
+      {},
+    );
 
-      await buildStep.writeAsString(
-        buildStep.allowedOutputs.single,
-        code,
-      );
-    }
+    return Library((b) => b
+      ..directives.addAll(imports.map(Directive.import))
+      ..body.add(Code(content)));
   }
 }
