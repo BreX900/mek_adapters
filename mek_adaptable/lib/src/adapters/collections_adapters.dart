@@ -17,7 +17,7 @@ class ListAdapter extends PrimitiveAdapter<List> {
   @override
   Object serialize(Adapters adapters, List item, {ItemType? type, ItemFormat? format}) {
     return item.map((e) {
-      return adapters.serialize(e, type: type!.params.single);
+      return adapters.serializeAny(e, type: type!.params.single);
     }).toList();
   }
 }
@@ -31,7 +31,7 @@ class MapAdapter extends PrimitiveAdapter<Map> {
     final map = adapters.findFactory<Map>(type);
 
     (object as Map).forEach((key, value) {
-      map[adapters.serialize(key, type: keyType)] = adapters.deserialize(value, type: valueType);
+      map[adapters.serializeAny(key, type: keyType)] = adapters.deserialize(value, type: valueType);
     });
 
     return map;
@@ -44,8 +44,8 @@ class MapAdapter extends PrimitiveAdapter<Map> {
 
     return item.map((key, value) {
       return MapEntry(
-        adapters.serialize(key, type: keyType),
-        adapters.serialize(value, type: valueType),
+        adapters.serializeAny(key, type: keyType),
+        adapters.serializeAny(value, type: valueType),
       );
     });
   }

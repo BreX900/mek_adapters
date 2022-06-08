@@ -5,8 +5,8 @@ import 'package:mek_json_adapter/src/utils.dart';
 class _RecipeBookClassRefs {
   const _RecipeBookClassRefs();
 
-  final String deserialize = '${_RecipeClassRefs._adapters}.$_deserialize';
-  final String serialize = '${_RecipeClassRefs._adapters}.$_serialize';
+  final String deserialize = '${_RecipeClassRefs._adapters}.deserializeAny';
+  final String serialize = '${_RecipeClassRefs._adapters}.serializeAny';
 
   static const String _deserialize = 'deserialize';
   static const String _serialize = 'serialize';

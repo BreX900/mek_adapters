@@ -2,24 +2,17 @@ builders:
   mek_adapters:
     import: package:mek_json_adapter/builder.dart
     builder_factories: [ 'buildAdapters' ]
-    build_extensions: { "lib/{{}}.dart": [ "lib/generated/{{}}.adapters.g.dart" ] }
+    build_extensions: { "lib/{{}}.dart": [ "lib/generated/{{}}.adapters.dart" ] }
     auto_apply: root_package # dependents all_packages
     build_to: source
-    runs_before: ['mek_bundle_adapters', 'mek_bundle_adapters_v2']
+    runs_before: [ 'mek_bundle_adapters' ]
   mek_bundle_adapters:
     import: package:mek_json_adapter/builder.dart
     builder_factories: [ 'buildBundleAdapters' ]
-    build_extensions: { "$lib$": [ "adapters.g.dart" ] }
+    build_extensions: { "lib/{{}}_adapters.dart": [ "lib/{{}}_adapters.bundle.dart" ] }
     auto_apply: root_package # dependents all_packages
     build_to: source
-    required_inputs: [ '.adapters.g.dart' ]
-  mek_bundle_adapters_v2:
-    import: package:mek_json_adapter/builder.dart
-    builder_factories: [ 'buildBundleAdaptersV2' ]
-    build_extensions: { "lib/{{}}.dart": [ "lib/{{}}.adapters_v2.g.dart" ] }
-    auto_apply: root_package # dependents all_packages
-    build_to: source
-    required_inputs: [ '.adapters.g.dart' ]
+    required_inputs: [ '.adapters.dart' ]
 
 
 

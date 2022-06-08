@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:mek_adaptable/src/adapters/adapters_base.dart';
 import 'package:mek_adaptable/src/adapters/collections_adapters.dart';
 import 'package:mek_adaptable/src/adapters/primitives_adapters.dart';
+import 'package:mek_adaptable/src/annotations.dart';
 import 'package:mek_adaptable/src/item_type.dart';
 
 typedef AdapterFactory = Object Function();
@@ -58,7 +59,15 @@ class Adapters {
   //   throw 'Not supported';
   // }
 
-  T deserialize<T>(
+  T deserialize<T extends Adaptable>(
+    Object? data, {
+    ItemType? type,
+    ItemFormat? format,
+  }) {
+    return deserializeAny(data);
+  }
+
+  T deserializeAny<T>(
     Object? data, {
     ItemType? type,
     ItemFormat? format,
@@ -84,7 +93,15 @@ class Adapters {
     }
   }
 
-  Object? serialize<T>(
+  Object? serialize<T extends Adaptable>(
+    T data, {
+    ItemType? type,
+    ItemFormat? format,
+  }) {
+    return serialize(data, type: type, format: format);
+  }
+
+  Object? serializeAny<T>(
     T data, {
     ItemType? type,
     ItemFormat? format,

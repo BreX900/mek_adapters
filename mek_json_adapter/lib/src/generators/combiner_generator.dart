@@ -9,6 +9,7 @@ import 'package:source_gen/source_gen.dart';
 
 class CombinerGenerator implements Builder {
   final bool allowSyntaxErrors;
+  final bool importBuildFile;
   final DartDecorator decorator;
   final List<Generator> generators;
   @override
@@ -16,6 +17,7 @@ class CombinerGenerator implements Builder {
 
   CombinerGenerator({
     this.allowSyntaxErrors = false,
+    this.importBuildFile = true,
     required this.buildExtensions,
     required this.decorator,
     required this.generators,
@@ -45,7 +47,7 @@ class CombinerGenerator implements Builder {
       ..body.addAll(bodies));
 
     final code = decorator.decorate(
-      imports: [buildStep.inputId.uri.toString()],
+      imports: [if (importBuildFile) buildStep.inputId.uri.toString()],
       code: emitter.visitLibrary(libraryCode),
     );
 
@@ -109,7 +111,16 @@ abstract class SuperTypeGenerator<T> extends Generator {
 
   @override
   Stream<Library> generate(LibraryReader library, BuildStep buildStep) async* {
-    for (var extendedElement in library.enums.where(typeChecker.isSuperOf)) {
+    for (var extendedElement in library.enums.where(typeChecker.isAssignableFrom)) {
+      final generatedValue = await generateForExtendedElement(
+        extendedElement,
+        buildStep,
+      );
+
+      if (generatedValue != null) yield generatedValue;
+    }
+
+    for (var extendedElement in library.classes.where(typeChecker.isAssignableFrom)) {
       final generatedValue = await generateForExtendedElement(
         extendedElement,
         buildStep,
@@ -124,13 +135,3 @@ abstract class SuperTypeGenerator<T> extends Generator {
     BuildStep buildStep,
   );
 }
-
-// class GeneratedLibrary {
-//   final List<String> imports;
-//   final String content;
-//
-//   const GeneratedLibrary({
-//     this.imports = const [],
-//     required this.content,
-//   });
-// }

@@ -1,4 +1,4 @@
-import 'package:example/adapters/adapters.adapters_v2.g.dart';
+import 'package:example/adapters/my_adapters.bundle.dart';
 import 'package:mek_adaptable/mek_adaptable.dart';
 
 @BundleAdapters(
